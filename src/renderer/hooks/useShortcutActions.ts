@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { getPrimaryAccountHostname } from '../utils/auth/utils';
+import { getAdapter } from '../utils/forges/registry';
 import { quitApp } from '../utils/system/comms';
 import { openHostIssues, openHostNotifications, openHostPulls } from '../utils/system/links';
 import { useAppContext } from './useAppContext';
@@ -33,7 +33,7 @@ type ShortcutConfigs = Record<ShortcutName, ShortcutConfig>;
  * Centralized shortcut actions + enabled state + hotkeys.
  * Used by both the global shortcuts component and UI buttons to avoid duplication.
  */
-export function useShortcutActions(): { shortcuts: ShortcutConfigs } {
+export function useShortcutActions(): { shortcuts: ShortcutConfigs; pullRequestTerm: string } {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +43,11 @@ export function useShortcutActions(): { shortcuts: ShortcutConfigs } {
   const isOnSettingsRoute = location.pathname.startsWith('/settings');
   const isLoading = status === 'loading';
 
-  const primaryAccountHostname = getPrimaryAccountHostname(auth);
+  const primaryAccount = auth.accounts[0];
+
+  const pullRequestTerm = primaryAccount
+    ? getAdapter(primaryAccount).pullRequestTerm
+    : 'pull request';
 
   const shortcuts: ShortcutConfigs = useMemo(() => {
     return {
@@ -55,7 +59,7 @@ export function useShortcutActions(): { shortcuts: ShortcutConfigs } {
       myNotifications: {
         key: 'n',
         isAllowed: isLoggedIn,
-        action: () => openHostNotifications(primaryAccountHostname),
+        action: () => primaryAccount && openHostNotifications(primaryAccount),
       },
       focusedMode: {
         key: 'w',
@@ -76,12 +80,12 @@ export function useShortcutActions(): { shortcuts: ShortcutConfigs } {
       myIssues: {
         key: 'i',
         isAllowed: isLoggedIn,
-        action: () => openHostIssues(primaryAccountHostname),
+        action: () => primaryAccount && openHostIssues(primaryAccount),
       },
       myPullRequests: {
         key: 'p',
         isAllowed: isLoggedIn,
-        action: () => openHostPulls(primaryAccountHostname),
+        action: () => primaryAccount && openHostPulls(primaryAccount),
       },
       refresh: {
         key: 'r',
@@ -126,8 +130,8 @@ export function useShortcutActions(): { shortcuts: ShortcutConfigs } {
     isOnSettingsRoute,
     fetchNotifications,
     updateSetting,
-    primaryAccountHostname,
+    primaryAccount,
   ]);
 
-  return { shortcuts };
+  return { shortcuts, pullRequestTerm };
 }

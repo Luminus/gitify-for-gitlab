@@ -35,19 +35,19 @@ describe('renderer/utils/links.ts', () => {
   });
 
   it('openHostNotifications', () => {
-    openHostNotifications(mockGitHubCloudAccount.hostname);
+    openHostNotifications(mockGitHubCloudAccount);
 
     expect(openExternalLinkSpy).toHaveBeenCalledWith('https://github.com/notifications');
   });
 
   it('openHostIssues', () => {
-    openHostIssues(mockGitHubCloudAccount.hostname);
+    openHostIssues(mockGitHubCloudAccount);
 
     expect(openExternalLinkSpy).toHaveBeenCalledWith('https://github.com/issues');
   });
 
   it('openHostPulls', () => {
-    openHostPulls(mockGitHubCloudAccount.hostname);
+    openHostPulls(mockGitHubCloudAccount);
 
     expect(openExternalLinkSpy).toHaveBeenCalledWith('https://github.com/pulls');
   });

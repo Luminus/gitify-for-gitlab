@@ -96,6 +96,11 @@ export const giteaAdapter: ForgeAdapter = {
   },
   getDisplayHelpers,
 
+  pullRequestTerm: 'pull request',
+  getNotificationsUrl: (account: Account) => `https://${account.hostname}/notifications` as Link,
+  getIssuesUrl: (account: Account) => `https://${account.hostname}/issues` as Link,
+  getPullRequestsUrl: (account: Account) => `https://${account.hostname}/pulls` as Link,
+
   // Gitea PATs from /user/settings/applications are 40-char lowercase hex.
   validateToken: (token: Token) => /^[a-f0-9]{40}$/.test(token),
   getPersonalAccessTokenSettingsUrl: (hostname: Hostname) =>

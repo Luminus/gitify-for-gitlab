@@ -102,6 +102,11 @@ export const githubAdapter: ForgeAdapter = {
   followUrl,
   getDisplayHelpers,
 
+  pullRequestTerm: 'pull request',
+  getNotificationsUrl: (account: Account) => `https://${account.hostname}/notifications` as Link,
+  getIssuesUrl: (account: Account) => `https://${account.hostname}/issues` as Link,
+  getPullRequestsUrl: (account: Account) => `https://${account.hostname}/pulls` as Link,
+
   defaultHostname: Constants.GITHUB_HOSTNAME,
   validateToken: isValidToken,
   getPersonalAccessTokenSettingsUrl: getNewTokenURL,

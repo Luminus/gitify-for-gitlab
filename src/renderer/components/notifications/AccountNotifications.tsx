@@ -11,6 +11,7 @@ import { HoverGroup } from '../primitives/HoverGroup';
 import { type Account, type GitifyError, type GitifyNotification, Size } from '../../types';
 
 import { hasMultipleAccounts } from '../../utils/auth/utils';
+import { getAdapter } from '../../utils/forges/registry';
 import {
   groupNotificationsByRepository,
   isGroupByRepository,
@@ -98,16 +99,16 @@ export const AccountNotifications: FC<AccountNotificationsProps> = (
             }
           >
             <HoverButton
-              action={() => openHostIssues(account.hostname)}
+              action={() => openHostIssues(account)}
               icon={IssueOpenedIcon}
               label="My issues ↗"
               testid="account-issues"
             />
 
             <HoverButton
-              action={() => openHostPulls(account.hostname)}
+              action={() => openHostPulls(account)}
               icon={GitPullRequestIcon}
-              label="My pull requests ↗"
+              label={`My ${getAdapter(account).pullRequestTerm}s ↗`}
               testid="account-pull-requests"
             />
 

@@ -160,6 +160,19 @@ export interface ForgeAdapter {
 
   // --- Login & token UX ---
 
+  /**
+   * Forge-specific term for a pull request shown in the sidebar button label
+   * (e.g. "pull request" for GitHub/Gitea, "merge request" for GitLab).
+   */
+  readonly pullRequestTerm: string;
+
+  /** URL to the user's notification/todo inbox on this forge. */
+  getNotificationsUrl(account: Account): Link;
+  /** URL to the user's open issues dashboard on this forge. */
+  getIssuesUrl(account: Account): Link;
+  /** URL to the user's open pull/merge requests dashboard on this forge. */
+  getPullRequestsUrl(account: Account): Link;
+
   /** Default hostname pre-filled in the PAT login form. */
   defaultHostname?: Hostname;
   /** Whether the supplied token matches the forge's PAT format. */

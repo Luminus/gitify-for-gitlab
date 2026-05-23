@@ -25,7 +25,7 @@ export const Sidebar: FC = () => {
   const { status, isLoggedIn, settings, notificationCount, hasUnreadNotifications } =
     useAppContext();
 
-  const { shortcuts } = useShortcutActions();
+  const { shortcuts, pullRequestTerm } = useShortcutActions();
 
   const hasFilters = useFiltersStore((s) => s.hasActiveFilters());
 
@@ -106,7 +106,7 @@ export const Sidebar: FC = () => {
         />
 
         <IconButton
-          aria-label="My pull requests ↗"
+          aria-label={`My ${pullRequestTerm}s ↗`}
           data-testid="sidebar-my-pull-requests"
           icon={GitPullRequestIcon}
           keybindingHint={shortcuts.myPullRequests.key}

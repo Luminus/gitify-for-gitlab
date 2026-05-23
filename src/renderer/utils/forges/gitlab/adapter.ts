@@ -88,6 +88,13 @@ export const gitlabAdapter: ForgeAdapter = {
   },
   getDisplayHelpers,
 
+  pullRequestTerm: 'merge request',
+  getNotificationsUrl: (account: Account) => `https://${account.hostname}/dashboard/todos` as Link,
+  getIssuesUrl: (account: Account) =>
+    `https://${account.hostname}/dashboard/work_items?assignee_username=${account.user?.login}` as Link,
+  getPullRequestsUrl: (account: Account) =>
+    `https://${account.hostname}/dashboard/merge_requests` as Link,
+
   defaultHostname: 'gitlab.com' as Hostname,
   // GitLab PATs: new format is glpat- + 20 chars; legacy format is 20 plain chars.
   // Accept either form — and any future prefix variants — by requiring only that
