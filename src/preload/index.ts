@@ -1,4 +1,4 @@
-import { contextBridge, webFrame } from 'electron';
+import { contextBridge, ipcRenderer, webFrame } from 'electron';
 
 import type { IKeyboardShortcut } from '../shared/events';
 import { EVENTS } from '../shared/events';
@@ -228,6 +228,17 @@ export const api = {
  * Use `contextBridge` APIs to expose Electron APIs to renderer.
  * Context isolation is always enabled in this app
  */
+try {
+  // Expose the electron-log IPC bridge so renderer-process log calls reach the
+  // main process log file. Without this, window.__electronLog is undefined and
+  // the IPC transport silently drops all renderer log messages.
+  contextBridge.exposeInMainWorld('__electronLog', {
+    sendToMain: (message: unknown) => ipcRenderer.send('__ELECTRON_LOG__', message),
+  });
+} catch (_error) {
+  // Already exposed — ignore duplicate registration.
+}
+
 try {
   contextBridge.exposeInMainWorld('gitify', api);
 } catch (error) {

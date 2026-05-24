@@ -15,6 +15,7 @@ import type {
   RefreshAccountData,
 } from '../types';
 
+import { rendererLogError, toError } from '../../core/logger';
 import { createNotificationHandler } from '../github/handlers';
 import {
   fetchGitLabAuthenticatedUser,
@@ -69,8 +70,8 @@ async function listNotifications(
       const issueNotifications = transformGitLabIssues(unique, projectMap, account);
       return [...todoNotifications, ...issueNotifications];
     }
-  } catch {
-    // Extra-issue fetch failures must not block todo notifications
+  } catch (err) {
+    rendererLogError('listNotifications', 'GitLab extra-issue fetch failed', toError(err));
   }
 
   return todoNotifications;

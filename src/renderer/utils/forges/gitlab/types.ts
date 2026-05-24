@@ -79,6 +79,7 @@ export interface GitLabIssue {
   project_id: number;
   title: string;
   state: 'opened' | 'closed';
+  draft: boolean;
   web_url: string | null;
   created_at: string;
   updated_at: string;

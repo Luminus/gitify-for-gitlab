@@ -11,14 +11,16 @@
  *    Todos already cover assigned/mentioned; emoji reactions are the only
  *    "interacted with" signal exposed by the GitLab Issues API.
  *
- * State (last-seen cursor, last-fetch time, project cache) is persisted to
- * localStorage so it survives app restarts. Both modes keep independent cursors
- * so switching modes always triggers a fresh fetch for the new mode.
+ * State (last-seen cursor, last-fetch time, project cache, visible issues) is
+ * persisted to localStorage so it survives app restarts. Both modes keep
+ * independent cursors so switching modes always triggers a fresh fetch for the
+ * new mode.
  */
 
 import type { Account } from '../../../types';
 import type { GitLabIssue, GitLabProject, GitLabProjectNotificationSettings } from './types';
 
+import { rendererLogInfo } from '../../core/logger';
 import {
   getGitLabProjectNotificationSettings,
   listGitLabInteractedIssues,
@@ -28,13 +30,24 @@ import {
 
 const PROJECTS_CACHE_TTL_MS = 60 * 60 * 1000;
 const POLL_INTERVAL_MS = 60 * 60 * 1000;
-const STARTUP_LOOKBACK_MS = 60 * 60 * 1000;
+const STARTUP_LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
 
 type Mode = 'watch' | 'participate';
 
 // Maps notificationId ("issue-<id>") → {createdAt, mode} so mark-as-read
 // can advance the correct cursor.
 const issueTimestamps = new Map<string, { createdAt: string; mode: Mode }>();
+
+interface IssueResult {
+  issues: GitLabIssue[];
+  projectMap: Map<number, GitLabProject>;
+}
+
+// Serialised form stored in localStorage (Map is not JSON-serialisable).
+interface PersistedIssueCache {
+  issues: GitLabIssue[];
+  projectEntries: Array<[number, GitLabProject]>;
+}
 
 function lsKey(account: Account, suffix: string): string {
   return `gitify:gitlab:watched:${account.hostname}:${account.user?.login ?? 'unknown'}:${suffix}`;
@@ -58,6 +71,75 @@ function getLastFetchMs(account: Account, mode: Mode): number {
 function setLastFetchMs(account: Account, mode: Mode): void {
   localStorage.setItem(lsKey(account, `lastFetch:${mode}`), String(Date.now()));
 }
+
+// ---------------------------------------------------------------------------
+// Persisted issue cache (survives page refreshes / app restarts)
+// ---------------------------------------------------------------------------
+
+function getPersistedIssues(account: Account, mode: Mode): IssueResult {
+  const raw = localStorage.getItem(lsKey(account, `issues:${mode}`));
+  if (!raw) {
+    return { issues: [], projectMap: new Map() };
+  }
+  try {
+    const parsed: PersistedIssueCache = JSON.parse(raw);
+    return {
+      issues: parsed.issues,
+      projectMap: new Map(parsed.projectEntries),
+    };
+  } catch {
+    return { issues: [], projectMap: new Map() };
+  }
+}
+
+function setPersistedIssues(account: Account, mode: Mode, result: IssueResult): void {
+  const data: PersistedIssueCache = {
+    issues: result.issues,
+    projectEntries: Array.from(result.projectMap.entries()),
+  };
+  localStorage.setItem(lsKey(account, `issues:${mode}`), JSON.stringify(data));
+}
+
+function removePersistedIssue(account: Account, mode: Mode, issueId: number): void {
+  const current = getPersistedIssues(account, mode);
+  const updated: IssueResult = {
+    issues: current.issues.filter((i) => i.id !== issueId),
+    projectMap: current.projectMap,
+  };
+  setPersistedIssues(account, mode, updated);
+}
+
+// ---------------------------------------------------------------------------
+// Merge helper — combines a fresh API result with previously persisted issues
+// ---------------------------------------------------------------------------
+
+function mergeAndPersist(
+  account: Account,
+  mode: Mode,
+  freshIssues: GitLabIssue[],
+  freshProjectMap: Map<number, GitLabProject>,
+): IssueResult {
+  const persisted = getPersistedIssues(account, mode);
+  const nonDraftFresh = freshIssues.filter((i) => !isExcludedIssue(i));
+  const freshIds = new Set(nonDraftFresh.map((i) => i.id));
+  // Keep persisted issues not present in the fresh batch, dropping any drafts
+  // that may have been cached before this filter was introduced.
+  const retained = persisted.issues.filter((i) => !freshIds.has(i.id) && !isExcludedIssue(i));
+  const mergedIssues = [...nonDraftFresh, ...retained];
+  const mergedProjectMap = new Map([...persisted.projectMap, ...freshProjectMap]);
+  const result: IssueResult = { issues: mergedIssues, projectMap: mergedProjectMap };
+  setPersistedIssues(account, mode, result);
+  // Re-register all visible issues in the timestamp map so mark-as-done works
+  // for issues that were restored from localStorage.
+  for (const issue of mergedIssues) {
+    issueTimestamps.set(`issue-${issue.id}`, { createdAt: issue.created_at, mode });
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Project data cache (notification settings)
+// ---------------------------------------------------------------------------
 
 interface ProjectsCache {
   projects: GitLabProject[];
@@ -90,8 +172,13 @@ async function resolveProjectData(
 ): Promise<{ projects: GitLabProject[]; watchedIds: number[] }> {
   const cached = getCachedProjectData(account);
   if (cached) {
+    rendererLogInfo(
+      'resolveProjectData',
+      `cache hit: projects=${cached.projects.length} watched=${cached.watchedIds.length}`,
+    );
     return cached;
   }
+  rendererLogInfo('resolveProjectData', 'cache miss — fetching member projects');
 
   const projects = await listGitLabMemberProjects(account);
 
@@ -121,24 +208,39 @@ async function resolveProjectData(
     })
     .map((p) => p.id);
 
+  rendererLogInfo(
+    'resolveProjectData',
+    `projects=${projects.length} watched=${watchedIds.length} settingsFailed=${settingsResults.filter((r) => r.status === 'rejected').length}`,
+  );
+
   const cache: ProjectsCache = { projects, watchedIds, fetchedAt: Date.now() };
   setCachedProjectData(account, cache);
   return cache;
 }
 
-function recordIssues(issues: GitLabIssue[], mode: Mode, account: Account): void {
-  if (issues.length === 0) {
-    return;
-  }
+// Matches "Draft:", "Draft -", "Draft ", "[Draft]", etc. — all common GitLab
+// title conventions for issues not yet ready for action.
+const DRAFT_TITLE_RE = /^(\[draft\]|draft[\s\W])/i;
 
-  const latest = issues.reduce(
-    (max, issue) => (issue.created_at > max ? issue.created_at : max),
-    '',
+// Matches automated weekly digest issues that aren't actionable notifications.
+const EXCLUDED_TITLE_RE = /^week ending\b/i;
+
+function isExcludedIssue(issue: GitLabIssue): boolean {
+  return (
+    issue.draft === true || DRAFT_TITLE_RE.test(issue.title) || EXCLUDED_TITLE_RE.test(issue.title)
   );
-  setLastSeenTimestamp(account, mode, latest);
+}
 
-  for (const issue of issues) {
-    issueTimestamps.set(`issue-${issue.id}`, { createdAt: issue.created_at, mode });
+function recordIssues(issues: GitLabIssue[], mode: Mode, account: Account): void {
+  // Advance the cursor past the most recently seen issue so the next hourly
+  // fetch only returns issues created after these. Previously-seen issues are
+  // kept visible via the persisted issue cache.
+  if (issues.length > 0) {
+    const latest = issues.reduce(
+      (max, issue) => (issue.created_at > max ? issue.created_at : max),
+      '',
+    );
+    setLastSeenTimestamp(account, mode, latest);
   }
 }
 
@@ -150,8 +252,16 @@ export async function listGitLabWatchedIssues(account: Account): Promise<{
   issues: GitLabIssue[];
   projectMap: Map<number, GitLabProject>;
 }> {
-  if (Date.now() - getLastFetchMs(account, 'watch') < POLL_INTERVAL_MS) {
-    return { issues: [], projectMap: new Map() };
+  const lastFetch = getLastFetchMs(account, 'watch');
+  const elapsed = Date.now() - lastFetch;
+  rendererLogInfo(
+    'listGitLabWatchedIssues',
+    `called: elapsed=${Math.round(elapsed / 1000)}s cooldown=${Math.round(POLL_INTERVAL_MS / 1000)}s`,
+  );
+
+  if (elapsed < POLL_INTERVAL_MS) {
+    rendererLogInfo('listGitLabWatchedIssues', 'cooldown active — returning persisted result');
+    return getPersistedIssues(account, 'watch');
   }
 
   // Arm the cooldown before any async work so a failure still prevents a
@@ -161,7 +271,7 @@ export async function listGitLabWatchedIssues(account: Account): Promise<{
   const { projects, watchedIds } = await resolveProjectData(account);
 
   if (watchedIds.length === 0) {
-    return { issues: [], projectMap: new Map() };
+    return getPersistedIssues(account, 'watch');
   }
 
   const projectMap = new Map(projects.map((p) => [p.id, p]));
@@ -175,8 +285,12 @@ export async function listGitLabWatchedIssues(account: Account): Promise<{
     .filter((r): r is PromiseFulfilledResult<GitLabIssue[]> => r.status === 'fulfilled')
     .flatMap((r) => r.value);
 
+  rendererLogInfo(
+    'listGitLabWatchedIssues',
+    `found ${allIssues.length} new issues across ${watchedIds.length} watched projects since ${since}`,
+  );
   recordIssues(allIssues, 'watch', account);
-  return { issues: allIssues, projectMap };
+  return mergeAndPersist(account, 'watch', allIssues, projectMap);
 }
 
 /**
@@ -190,7 +304,7 @@ export async function listGitLabParticipatingIssues(account: Account): Promise<{
   projectMap: Map<number, GitLabProject>;
 }> {
   if (Date.now() - getLastFetchMs(account, 'participate') < POLL_INTERVAL_MS) {
-    return { issues: [], projectMap: new Map() };
+    return getPersistedIssues(account, 'participate');
   }
 
   // Arm the cooldown before any async work so a failure still prevents a
@@ -204,11 +318,14 @@ export async function listGitLabParticipatingIssues(account: Account): Promise<{
   const allIssues = await listGitLabInteractedIssues(account);
 
   recordIssues(allIssues, 'participate', account);
-  return { issues: allIssues, projectMap };
+  return mergeAndPersist(account, 'participate', allIssues, projectMap);
 }
 
 /**
- * Advances the last-seen cursor for the mode this notification was fetched in.
+ * Advances the last-seen cursor for the mode this notification was fetched in,
+ * and removes the issue from both the in-memory and persisted caches so it
+ * disappears from the UI immediately.
+ *
  * Called when the user marks a watched-issue notification as read/done.
  */
 export function advanceTimestampForIssue(account: Account, notificationId: string): void {
@@ -217,8 +334,13 @@ export function advanceTimestampForIssue(account: Account, notificationId: strin
     return;
   }
   const { createdAt, mode } = info;
+
   const current = getLastSeenTimestamp(account, mode);
   if (createdAt > current) {
     setLastSeenTimestamp(account, mode, createdAt);
   }
+
+  const issueId = Number(notificationId.replace('issue-', ''));
+  removePersistedIssue(account, mode, issueId);
+  issueTimestamps.delete(notificationId);
 }

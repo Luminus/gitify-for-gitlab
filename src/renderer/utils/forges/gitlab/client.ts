@@ -106,19 +106,23 @@ export async function markGitLabTodoAsDone(account: Account, todoId: string): Pr
   await gitlabRequest<void>(account, `todos/${todoId}/mark_as_done`, { method: 'POST' });
 }
 
+// Limit to the most-recently-active projects to avoid paginating through the
+// thousands of inherited memberships that large GitLab orgs create. Users
+// whose watched projects fall outside this window can increase their GitLab
+// notification frequency via the GitLab UI.
+const MEMBER_PROJECTS_LIMIT = 3;
+
 export async function listGitLabMemberProjects(account: Account): Promise<GitLabProject[]> {
   const all: GitLabProject[] = [];
-  let page = 1;
-  while (true) {
+  for (let page = 1; page <= MEMBER_PROJECTS_LIMIT; page++) {
     const batch = await gitlabRequest<GitLabProject[]>(
       account,
-      `projects?membership=true&archived=false&per_page=${PAGE_SIZE}&page=${page}`,
+      `projects?membership=true&archived=false&order_by=last_activity_at&per_page=${PAGE_SIZE}&page=${page}`,
     );
     all.push(...batch);
     if (batch.length < PAGE_SIZE) {
       break;
     }
-    page++;
   }
   return all;
 }
