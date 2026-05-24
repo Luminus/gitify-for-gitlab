@@ -22,34 +22,6 @@ describe('renderer/components/notifications/NotificationFooter.tsx', () => {
     expect(tree.container).toMatchSnapshot();
   });
 
-  describe('security alerts should use github icon for avatar', () => {
-    it('Repository Dependabot Alerts Thread', async () => {
-      const mockNotification = mockGitifyNotification;
-      mockNotification.subject.type = 'RepositoryDependabotAlertsThread';
-
-      const props: NotificationFooterProps = {
-        notification: mockNotification,
-      };
-
-      const tree = renderWithProviders(<NotificationFooter {...props} />);
-
-      expect(tree.container).toMatchSnapshot();
-    });
-
-    it('Repository Vulnerability Alert', async () => {
-      const mockNotification = mockGitifyNotification;
-      mockNotification.subject.type = 'RepositoryVulnerabilityAlert';
-
-      const props: NotificationFooterProps = {
-        notification: mockNotification,
-      };
-
-      const tree = renderWithProviders(<NotificationFooter {...props} />);
-
-      expect(tree.container).toMatchSnapshot();
-    });
-  });
-
   it('should default to known avatar if no user found', async () => {
     const mockNotification = mockGitifyNotification;
     mockNotification.subject.user = undefined;

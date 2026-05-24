@@ -9,38 +9,14 @@ import type {
 import type { Filter } from './types';
 
 const SUBJECT_TYPE_DETAILS: Record<SubjectType, TypeDetails> = {
-  CheckSuite: {
-    title: 'Check Suite',
-  },
   Commit: {
     title: 'Commit',
-  },
-  Discussion: {
-    title: 'Discussion',
   },
   Issue: {
     title: 'Issue',
   },
   PullRequest: {
     title: 'Pull Request',
-  },
-  Release: {
-    title: 'Release',
-  },
-  RepositoryAdvisory: {
-    title: 'Advisory',
-  },
-  RepositoryDependabotAlertsThread: {
-    title: 'Dependabot Alert',
-  },
-  RepositoryInvitation: {
-    title: 'Invitation',
-  },
-  RepositoryVulnerabilityAlert: {
-    title: 'Vulnerability Alert',
-  },
-  WorkflowRun: {
-    title: 'Workflow Run',
   },
 };
 

@@ -3,8 +3,8 @@ import {
   CommentIcon,
   FeedPersonIcon,
   FileDiffIcon,
-  MarkGithubIcon,
   OrganizationIcon,
+  ServerIcon,
 } from '@primer/octicons-react';
 
 import { type GitifyPullRequestReview, IconColor } from '../../types';
@@ -106,17 +106,13 @@ describe('renderer/utils/icons.ts', () => {
   });
 
   it('getPlatformIcon', () => {
-    expect(getPlatformIcon('GitHub Cloud')).toMatchSnapshot();
-
-    expect(getPlatformIcon('GitHub Enterprise Server')).toMatchSnapshot();
-
-    expect(getPlatformIcon('GitHub Enterprise Cloud with Data Residency')).toMatchSnapshot();
+    expect(getPlatformIcon('GitLab')).toBe(ServerIcon);
   });
 
   it('getDefaultUserIcon', () => {
-    expect(getDefaultUserIcon('Bot')).toBe(MarkGithubIcon);
+    expect(getDefaultUserIcon('Bot')).toBe(FeedPersonIcon);
     expect(getDefaultUserIcon('EnterpriseUserAccount')).toBe(FeedPersonIcon);
-    expect(getDefaultUserIcon('Mannequin')).toBe(MarkGithubIcon);
+    expect(getDefaultUserIcon('Mannequin')).toBe(FeedPersonIcon);
     expect(getDefaultUserIcon('Organization')).toBe(OrganizationIcon);
     expect(getDefaultUserIcon('User')).toBe(FeedPersonIcon);
   });

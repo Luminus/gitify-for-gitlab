@@ -24,23 +24,8 @@ describe('renderer/utils/notifications/filters/state.ts', () => {
       MERGED: 'merged',
       DRAFT: 'draft',
 
-      // Discussion-specific
       ANSWERED: 'other',
       OUTDATED: 'other',
-
-      // Check suite / workflow states
-      ACTION_REQUIRED: 'other',
-      CANCELLED: 'other',
-      FAILURE: 'other',
-      IN_PROGRESS: 'other',
-      PENDING: 'other',
-      QUEUED: 'other',
-      REQUESTED: 'other',
-      SKIPPED: 'other',
-      STALE: 'other',
-      SUCCESS: 'other',
-      TIMED_OUT: 'other',
-      WAITING: 'other',
     } satisfies Record<GitifyNotificationState, FilterStateType>;
 
     it.each(Object.entries(cases) as Array<[GitifyNotificationState, FilterStateType]>)(

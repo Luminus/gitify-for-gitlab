@@ -91,60 +91,6 @@ exports[`renderer/components/filters/SubjectTypeFilter.tsx > should render itsel
       >
         <input
           class="size-4 rounded-sm cursor-pointer"
-          data-testid="checkbox-Advisory"
-          id="Advisory"
-          type="checkbox"
-        />
-        <label
-          class="font-medium text-gitify-font cursor-pointer"
-          for="Advisory"
-        >
-          Advisory
-        </label>
-        <span
-          class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
-        >
-          0
-        </span>
-      </div>
-      <div
-        class="text-sm prc-Stack-Stack-UQ9k6"
-        data-align="center"
-        data-direction="horizontal"
-        data-gap="condensed"
-        data-justify="start"
-        data-padding="none"
-        data-wrap="nowrap"
-      >
-        <input
-          class="size-4 rounded-sm cursor-pointer"
-          data-testid="checkbox-Check Suite"
-          id="Check Suite"
-          type="checkbox"
-        />
-        <label
-          class="font-medium text-gitify-font cursor-pointer"
-          for="Check Suite"
-        >
-          Check Suite
-        </label>
-        <span
-          class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
-        >
-          0
-        </span>
-      </div>
-      <div
-        class="text-sm prc-Stack-Stack-UQ9k6"
-        data-align="center"
-        data-direction="horizontal"
-        data-gap="condensed"
-        data-justify="start"
-        data-padding="none"
-        data-wrap="nowrap"
-      >
-        <input
-          class="size-4 rounded-sm cursor-pointer"
           data-testid="checkbox-Commit"
           id="Commit"
           type="checkbox"
@@ -154,87 +100,6 @@ exports[`renderer/components/filters/SubjectTypeFilter.tsx > should render itsel
           for="Commit"
         >
           Commit
-        </label>
-        <span
-          class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
-        >
-          0
-        </span>
-      </div>
-      <div
-        class="text-sm prc-Stack-Stack-UQ9k6"
-        data-align="center"
-        data-direction="horizontal"
-        data-gap="condensed"
-        data-justify="start"
-        data-padding="none"
-        data-wrap="nowrap"
-      >
-        <input
-          class="size-4 rounded-sm cursor-pointer"
-          data-testid="checkbox-Dependabot Alert"
-          id="Dependabot Alert"
-          type="checkbox"
-        />
-        <label
-          class="font-medium text-gitify-font cursor-pointer"
-          for="Dependabot Alert"
-        >
-          Dependabot Alert
-        </label>
-        <span
-          class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
-        >
-          0
-        </span>
-      </div>
-      <div
-        class="text-sm prc-Stack-Stack-UQ9k6"
-        data-align="center"
-        data-direction="horizontal"
-        data-gap="condensed"
-        data-justify="start"
-        data-padding="none"
-        data-wrap="nowrap"
-      >
-        <input
-          class="size-4 rounded-sm cursor-pointer"
-          data-testid="checkbox-Discussion"
-          id="Discussion"
-          type="checkbox"
-        />
-        <label
-          class="font-medium text-gitify-font cursor-pointer"
-          for="Discussion"
-        >
-          Discussion
-        </label>
-        <span
-          class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
-        >
-          0
-        </span>
-      </div>
-      <div
-        class="text-sm prc-Stack-Stack-UQ9k6"
-        data-align="center"
-        data-direction="horizontal"
-        data-gap="condensed"
-        data-justify="start"
-        data-padding="none"
-        data-wrap="nowrap"
-      >
-        <input
-          class="size-4 rounded-sm cursor-pointer"
-          data-testid="checkbox-Invitation"
-          id="Invitation"
-          type="checkbox"
-        />
-        <label
-          class="font-medium text-gitify-font cursor-pointer"
-          for="Invitation"
-        >
-          Invitation
         </label>
         <span
           class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
@@ -266,7 +131,7 @@ exports[`renderer/components/filters/SubjectTypeFilter.tsx > should render itsel
         <span
           class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
         >
-          2
+          3
         </span>
       </div>
       <div
@@ -294,87 +159,6 @@ exports[`renderer/components/filters/SubjectTypeFilter.tsx > should render itsel
           class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
         >
           1
-        </span>
-      </div>
-      <div
-        class="text-sm prc-Stack-Stack-UQ9k6"
-        data-align="center"
-        data-direction="horizontal"
-        data-gap="condensed"
-        data-justify="start"
-        data-padding="none"
-        data-wrap="nowrap"
-      >
-        <input
-          class="size-4 rounded-sm cursor-pointer"
-          data-testid="checkbox-Release"
-          id="Release"
-          type="checkbox"
-        />
-        <label
-          class="font-medium text-gitify-font cursor-pointer"
-          for="Release"
-        >
-          Release
-        </label>
-        <span
-          class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
-        >
-          1
-        </span>
-      </div>
-      <div
-        class="text-sm prc-Stack-Stack-UQ9k6"
-        data-align="center"
-        data-direction="horizontal"
-        data-gap="condensed"
-        data-justify="start"
-        data-padding="none"
-        data-wrap="nowrap"
-      >
-        <input
-          class="size-4 rounded-sm cursor-pointer"
-          data-testid="checkbox-Vulnerability Alert"
-          id="Vulnerability Alert"
-          type="checkbox"
-        />
-        <label
-          class="font-medium text-gitify-font cursor-pointer"
-          for="Vulnerability Alert"
-        >
-          Vulnerability Alert
-        </label>
-        <span
-          class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
-        >
-          0
-        </span>
-      </div>
-      <div
-        class="text-sm prc-Stack-Stack-UQ9k6"
-        data-align="center"
-        data-direction="horizontal"
-        data-gap="condensed"
-        data-justify="start"
-        data-padding="none"
-        data-wrap="nowrap"
-      >
-        <input
-          class="size-4 rounded-sm cursor-pointer"
-          data-testid="checkbox-Workflow Run"
-          id="Workflow Run"
-          type="checkbox"
-        />
-        <label
-          class="font-medium text-gitify-font cursor-pointer"
-          for="Workflow Run"
-        >
-          Workflow Run
-        </label>
-        <span
-          class="px-2 py-0.25 rounded-full text-[10px] font-medium leading-none min-w-[16px] text-gitify-counter-text bg-gitify-counter-secondary prc-Text-Text-9mHv3"
-        >
-          0
         </span>
       </div>
     </div>

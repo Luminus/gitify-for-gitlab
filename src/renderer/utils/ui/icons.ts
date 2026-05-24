@@ -5,11 +5,9 @@ import {
   CommentIcon,
   FeedPersonIcon,
   FileDiffIcon,
-  MarkGithubIcon,
   type OcticonProps,
   OrganizationIcon,
   ServerIcon,
-  ShieldCheckIcon,
 } from '@primer/octicons-react';
 
 import {
@@ -59,22 +57,15 @@ export function getPullRequestReviewIcon(
 
 export function getPlatformIcon(platform: PlatformType): FC<OcticonProps> | null {
   switch (platform) {
-    case 'Gitea':
+    case 'GitLab':
       return ServerIcon;
-    case 'GitHub Enterprise Server':
-      return ServerIcon;
-    case 'GitHub Enterprise Cloud with Data Residency':
-      return ShieldCheckIcon;
     default:
-      return MarkGithubIcon;
+      return null;
   }
 }
 
 export function getDefaultUserIcon(userType: UserType) {
   switch (userType) {
-    case 'Bot':
-    case 'Mannequin':
-      return MarkGithubIcon;
     case 'Organization':
       return OrganizationIcon;
     default:
